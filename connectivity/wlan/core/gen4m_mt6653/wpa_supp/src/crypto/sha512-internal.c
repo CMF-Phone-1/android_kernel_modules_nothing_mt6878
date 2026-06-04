@@ -101,7 +101,6 @@ static const u64 K[80] = {
 #define Gamma0(x) (S(x, 1) ^ S(x, 8) ^ R(x, 7))
 #define Gamma1(x) (S(x, 19) ^ S(x, 61) ^ R(x, 6))
 #ifndef MIN
-#define MIN(x, y) (((x) < (y)) ? (x) : (y))
 #endif
 
 #define ROR64c(x, y)                                                           \
