@@ -98,7 +98,7 @@ uint256_t;
 
 #ifndef MIN
 #define MIN(a, b) \
- ({__typeof(a) _a = (a); __typeof(b) _b = (b); _a > _b ? _b : _a;})
+	({__typeof(a) _a = (a); __typeof(b) _b = (b); _a > _b ? _b : _a;})
 #endif
 
 #if !defined(DEVICE_MEMSETCPY_ALIGN_IN_BYTES)
