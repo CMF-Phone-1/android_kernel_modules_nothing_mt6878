@@ -820,7 +820,12 @@ static inline void kalCfg80211VendorEvent(void *pvPacket)
 #define KAL_WAKE_LOCK_TIMEOUT(_prAdapter, _prWakeLock, _u4Timeout) \
 { \
 	if (_prWakeLock) { \
-		__pm_wakeup_event(_prWakeLock, JIFFIES_TO_MSEC(_u4Timeout)); \
+		struct GLUE_INFO *_prGlueInfo = (_prAdapter) ? ((struct ADAPTER *)(_prAdapter))->prGlueInfo : NULL; \
+		if (_prGlueInfo && _prGlueInfo->fgIsInSuspendMode) { \
+			__pm_relax(_prWakeLock); \
+		} else { \
+			__pm_wakeup_event(_prWakeLock, JIFFIES_TO_MSEC(_u4Timeout)); \
+		} \
 	} \
 }
 

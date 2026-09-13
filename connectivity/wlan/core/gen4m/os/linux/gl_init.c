@@ -574,6 +574,12 @@ int kalDcSetWow(void)
 
 	prGlueInfo->fgIsInSuspendMode = TRUE;
 
+#if CFG_ENABLE_WAKE_LOCK
+	/* Cancel any outstanding timed wakelock to unblock s2idle */
+	if (KAL_WAKE_LOCK_ACTIVE(NULL, prGlueInfo->rTimeoutWakeLock))
+		KAL_WAKE_UNLOCK(NULL, prGlueInfo->rTimeoutWakeLock);
+#endif
+
 	/* Stop upper layers calling the device hard_start_xmit routine. */
 	netif_tx_stop_all_queues(prGlueInfo->prDevHandler);
 

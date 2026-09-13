@@ -11624,6 +11624,16 @@ static int wlan_pm_notifier_callback(struct notifier_block
 		if (prGlueInfo->fgIsInSuspendMode)
 			goto out;
 		prGlueInfo->fgIsInSuspendMode = TRUE;
+#if CFG_ENABLE_WAKE_LOCK
+		/* Cancel any outstanding timed wakelock to avoid
+		 * blocking s2idle suspend. The macro change prevents
+		 * new acquisitions while fgIsInSuspendMode is TRUE.
+		 */
+		if (KAL_WAKE_LOCK_ACTIVE(NULL,
+					 prGlueInfo->rTimeoutWakeLock))
+			KAL_WAKE_UNLOCK(NULL,
+					prGlueInfo->rTimeoutWakeLock);
+#endif
 		wlanSetSuspendMode(prGlueInfo, TRUE);
 		p2pSetSuspendMode(prGlueInfo, TRUE);
 		break;
