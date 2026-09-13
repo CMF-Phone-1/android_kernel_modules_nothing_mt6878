@@ -1280,9 +1280,15 @@ static int mtk_pci_suspend(struct pci_dev *pdev, pm_message_t state)
 	ACQUIRE_POWER_CONTROL_FROM_PM(prAdapter);
 
 #if CFG_ENABLE_WAKE_LOCK
-	/* Cancel any outstanding timed wakelock to unblock s2idle */
+	/* Cancel any outstanding wakelock to unblock s2idle */
 	if (KAL_WAKE_LOCK_ACTIVE(NULL, prGlueInfo->rTimeoutWakeLock))
 		KAL_WAKE_UNLOCK(NULL, prGlueInfo->rTimeoutWakeLock);
+	if (KAL_WAKE_LOCK_ACTIVE(NULL, prGlueInfo->rMainThreadWakeLock))
+		KAL_WAKE_UNLOCK(NULL, prGlueInfo->rMainThreadWakeLock);
+	if (KAL_WAKE_LOCK_ACTIVE(NULL, prGlueInfo->rHifThreadWakeLock))
+		KAL_WAKE_UNLOCK(NULL, prGlueInfo->rHifThreadWakeLock);
+	if (KAL_WAKE_LOCK_ACTIVE(NULL, prGlueInfo->rRxThreadWakeLock))
+		KAL_WAKE_UNLOCK(NULL, prGlueInfo->rRxThreadWakeLock);
 #endif
 
 	/* Stop upper layers calling the device hard_start_xmit routine. */

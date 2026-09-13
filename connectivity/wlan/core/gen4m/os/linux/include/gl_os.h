@@ -863,6 +863,11 @@ struct GLUE_INFO {
 	&& CFG_ENABLE_WAKE_LOCK)
 	KAL_WAKE_LOCK_T *rDrvOwnWakeLock;
 #endif
+#if CFG_ENABLE_WAKE_LOCK
+	KAL_WAKE_LOCK_T *rMainThreadWakeLock;
+	KAL_WAKE_LOCK_T *rHifThreadWakeLock;
+	KAL_WAKE_LOCK_T *rRxThreadWakeLock;
+#endif
 
 #if CFG_MET_PACKET_TRACE_SUPPORT
 	u_int8_t fgMetProfilingEn;

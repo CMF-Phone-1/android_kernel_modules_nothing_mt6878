@@ -5519,6 +5519,7 @@ int hif_thread(void *data)
 
 	KAL_WAKE_LOCK_INIT(prGlueInfo->prAdapter,
 			   prHifThreadWakeLock, "WLAN hif_thread");
+	prGlueInfo->rHifThreadWakeLock = prHifThreadWakeLock;
 	KAL_WAKE_LOCK(prGlueInfo->prAdapter, prHifThreadWakeLock);
 #endif
 
@@ -5703,6 +5704,7 @@ int rx_thread(void *data)
 #if CFG_ENABLE_WAKE_LOCK
 	KAL_WAKE_LOCK_INIT(prGlueInfo->prAdapter,
 			   prRxThreadWakeLock, "WLAN rx_thread");
+	prGlueInfo->rRxThreadWakeLock = prRxThreadWakeLock;
 	KAL_WAKE_LOCK(prGlueInfo->prAdapter, prRxThreadWakeLock);
 #endif
 
@@ -5859,6 +5861,7 @@ int main_thread(void *data)
 #if CFG_ENABLE_WAKE_LOCK
 	KAL_WAKE_LOCK_INIT(prGlueInfo->prAdapter,
 			   prTxThreadWakeLock, "WLAN main_thread");
+	prGlueInfo->rMainThreadWakeLock = prTxThreadWakeLock;
 	KAL_WAKE_LOCK(prGlueInfo->prAdapter, prTxThreadWakeLock);
 #endif
 
@@ -11624,18 +11627,19 @@ static int wlan_pm_notifier_callback(struct notifier_block
 		if (prGlueInfo->fgIsInSuspendMode)
 			goto out;
 		prGlueInfo->fgIsInSuspendMode = TRUE;
-#if CFG_ENABLE_WAKE_LOCK
-		/* Cancel any outstanding timed wakelock to avoid
-		 * blocking s2idle suspend. The macro change prevents
-		 * new acquisitions while fgIsInSuspendMode is TRUE.
-		 */
-		if (KAL_WAKE_LOCK_ACTIVE(NULL,
-					 prGlueInfo->rTimeoutWakeLock))
-			KAL_WAKE_UNLOCK(NULL,
-					prGlueInfo->rTimeoutWakeLock);
-#endif
 		wlanSetSuspendMode(prGlueInfo, TRUE);
 		p2pSetSuspendMode(prGlueInfo, TRUE);
+#if CFG_ENABLE_WAKE_LOCK
+		/* Cancel any outstanding wakelocks to avoid blocking s2idle suspend */
+		if (KAL_WAKE_LOCK_ACTIVE(NULL, prGlueInfo->rTimeoutWakeLock))
+			KAL_WAKE_UNLOCK(NULL, prGlueInfo->rTimeoutWakeLock);
+		if (KAL_WAKE_LOCK_ACTIVE(NULL, prGlueInfo->rMainThreadWakeLock))
+			KAL_WAKE_UNLOCK(NULL, prGlueInfo->rMainThreadWakeLock);
+		if (KAL_WAKE_LOCK_ACTIVE(NULL, prGlueInfo->rHifThreadWakeLock))
+			KAL_WAKE_UNLOCK(NULL, prGlueInfo->rHifThreadWakeLock);
+		if (KAL_WAKE_LOCK_ACTIVE(NULL, prGlueInfo->rRxThreadWakeLock))
+			KAL_WAKE_UNLOCK(NULL, prGlueInfo->rRxThreadWakeLock);
+#endif
 		break;
 	case PM_POST_SUSPEND:
 	case PM_POST_HIBERNATION:
