@@ -11610,12 +11610,18 @@ static int wlan_pm_notifier_callback(struct notifier_block
 	struct GLUE_INFO *prGlueInfo = (struct GLUE_INFO *)
 				       wlan_notifier_priv_data;
 
+	/*
+	 * Never return NOTIFY_STOP from a PM notifier. On PM_SUSPEND_PREPARE it
+	 * stops the chain and sends PM_POST_SUSPEND to every notifier that was
+	 * already called, but notifier_to_errno(NOTIFY_STOP) is 0, so suspend
+	 * still carries on. Those drivers then act as if the system resumed,
+	 * re-arm their work and wakeup sources, and the freeze aborts.
+	 */
 	if (kalHaltTryLock())
-		return NOTIFY_STOP;
+		return NOTIFY_DONE;
 
-	if (kalIsHalted() || !prGlueInfo) {
+	if (kalIsHalted() || !prGlueInfo)
 		goto out;
-	}
 
 	switch (event) {
 	case PM_SUSPEND_PREPARE:
